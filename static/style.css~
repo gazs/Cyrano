@@ -1,0 +1,44 @@
+#kurzustabla {
+  list-style:none;
+  padding:0px;
+}
+
+.selected {
+  background-color:#ddd
+}
+
+.kozos_emberek {
+  list-style:none;
+  border: 1px solid black;
+  overflow: auto;
+  padding-left:0;
+}
+
+.kozos_emberek li {
+  padding:5px;
+  overflow:auto;
+  clear:both;
+}
+
+li:nth-child(even) {
+  background-color:#efefef;
+}
+
+li:nth-child(odd) {
+  background-color:#fff;
+}
+
+.kozos_emberek .pic_thumbnail {
+  width: 64px;
+  height: 64px;
+  text-align:center;
+  float:left;
+}
+
+.kozos_emberek .nev {
+  float:left;
+  height: 64px;
+  line-height: 64px;
+  vertical-align:middle;
+  font-size:1.4em;
+}

@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+<script src="/static/cucc.js"></script>
+<div id="login">
+	<form method="post" action="#" name="varazslat" id="varazslat">    
+		<label for="felhasznalonev">eha kód</label> <input type="text" class="text" name="felhasznalonev" />
+		<label for="jelszo">jelszó</label> <input type="password" class="text" name="jelszo" />
+		<button type="submit">bejelentkezés</button>
+	</form>
+</div>
+<div class="span-8">
+	<form method="post" action="#" id="bla">
+		<ul id="kurzustabla">
+
+		</ul>
+	</form>
+</div>
+
+{% endblock %}
