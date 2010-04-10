@@ -18,6 +18,34 @@ class NincsTalalatError(Exception):
       return repr(self.value)
 
 class Iwiw:
+  def search(self, **searchparams):
+    searchurl = "http://iwiw.hu/search/pages/user/ajaxsearch.jsp?do=AdvancedSearch&page=0&"
+    iwiwsearch = urlfetch.fetch(searchurl + urlencode(searchparams), headers={'Cookie': self.logincookie}).content
+    leves = BeautifulSoup(iwiwsearch)
+    cuccok = []
+    for kartya in leves.findAll("div", "cardContainer"):
+      nev = kartya.findAll("a")[1].string.strip()
+      name = nev.split("[")[0]
+      try:
+        nick = re.search("\[(?P<nick>.*)\]", nev).group(1)
+      except AttributeError:
+        nick = ""
+      profile_url = kartya.findAll("a")[1]["href"]
+      try:
+         pic_popup_url = kartya.find("a", "user_image")["onclick"].split("'")[1]
+      except KeyError:
+        pic_popup_url = ""
+      try:
+        pic_thumbnail = kartya.find("a", "user_image").img["src"]
+      except KeyError:
+        pic_thumbnail = ""
+      try:
+        city = kartya.find("div", "city").string.strip()
+      except AttributeError:
+        city = ""
+      tutu = {"name": name, "nick": nick, "profile_url": profile_url, "pic_popup_url": pic_popup_url, "pic_thumbnail": pic_thumbnail, "city": city}
+    cuccok.append(tutu)
+    return cuccok
   def firstn(self, count=5, **kwargs):
     url = "http://iwiw.hu/search/pages/user/ajaxsearch.jsp?do=AdvancedSearch&page=0&"
     url += urlencode(kwargs)
@@ -75,13 +103,13 @@ class Iwiw:
       raise NincsTalalatError(url)
   def __init__(self, email="iwiw@bergengocia.net", password="asdfasdf", logincookie="JSESSIONID=1267529305187_oxMjcxYzk0NzgxYTo3MTlk5267843077287685; Path=/, password=5ca9030fb22494a0e2866d02b3bfdfa1; Expires=Tue, 19-Oct-2010 23:01:45 GMT; Path=/, autoLoginLimited=0; Expires=Thu, 01-Jan-1970 00:00:10 GMT; Path=/, autoLoginLimited=0; Expires=Thu, 01-Jan-1970 00:00:10 GMT, autoLogin=0; Expires=Thu, 01-Jan-1970 00:00:10 GMT; Path=/, autoLogin=0; Expires=Thu, 01-Jan-1970 00:00:10 GMT, autoLoginNew=1; Expires=Sun, 29-Aug-2010 11:28:25 GMT; Path=/, forgetEmail=0; Expires=Tue, 19-Oct-2010 23:01:45 GMT; Path=/, email=aXdpd0BiZXJnZW5nb2NpYS5uZXQ$; Expires=Tue, 19-Oct-2010 23:01:45 GMT; Path=/, httpslogin=0; Expires=Tue, 19-Oct-2010 23:01:45 GMT; Path=/"):
     if logincookie:
-      # bejelentkezés is for losers
+      # bejelentkezés is for losers. de legalábbis nem megy.
       self.logincookie = logincookie
     else:
       loginurl = "http://iwiw.hu/pages/user/login.jsp?method=Login&&loginradio=1&email="+ email + "&password="+ password
       result = urlfetch.fetch(loginurl, follow_redirects=False)
       if (re.search("autoLoginLimited", result.headers.get('set-cookie', '')) ):
-        print result.headers.get('set-cookie', '')
+       # print result.headers.get('set-cookie', '')
         self.logincookie = result.headers.get('set-cookie', '')
       else:
         raise IwiwLoginError
