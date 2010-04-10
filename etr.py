@@ -30,7 +30,7 @@ class Etr:
   def listNevsor(self, kurzuskod):
     nevek = []
     self._browser.open("https://etr.elte.hu/etrweb/kurz_info.asp?lista=5&ckid=" + kurzuskod)
-    nevsor = BeautifulSoup( self._browser.response().read() )
+    nevsor = BeautifulSoup( self._browser.response().read(), convertEntities=BeautifulSoup.HTML_ENTITIES )
     lista = nevsor.findAll("tr", { "class": "sor0" } ) + nevsor.findAll("tr", { "class": "sor2" }) # páros oszlop, páratlan oszlop, red lorry, yellow lorry
     for elem in lista:
       try:

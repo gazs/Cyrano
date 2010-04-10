@@ -1,44 +1,138 @@
-#kurzustabla {
-  list-style:none;
-  padding:0px;
-}
+      body {
+        font-family:'Trebuchet MS', sans;
+        font-size:14px;
+        background-color:#111;
+      }
+      h1,h2,h3,h4,h5 {
+        padding-left:20px;
+      }
+      h1 {
+        background-color:white;
+        margin-top:0;
+        padding-top:30px;
+        padding-bottom:15px;
+      }
+      h1 a { color:black; text-decoration:none;}
+      h2 {
+       /* border-bottom: 1px solid #555;*/
+        margin-bottom:0;
+      }
+      h3 {
+        border:none;
+        padding:0;
+        margin:0;
+        display:inline;
+        font-size:16x;
+      }
+      #login {
+        text-align:center;
+      }
+      label {
+        font-weight:bold;
+      }
+      p {
+        padding-left:20px;
+        padding-right:20px;
+      }
+      .container {
+        width:600px;
+        margin:0 auto;
+        background-color:#eee;
+        border: 5px solid white;
+      }
+      .dzsendor {
+        font-size:16px;
+        font-weight:bold;
+      }
+      #szuro {
+        border: 1px solid #111;
+        background-color: #222;
+        color:#eee;
+        padding: 5px 200px 5px 100px;
+        overflow:auto;
+        position:relative;
+      }
+      #advancedgomb {
+        background-color:#ccc;
+        padding: 5px;
+        -webkit-border-radius: 5px;
+        float:right;
+        border: 1px solid #ccc;
+        color:#111;
+        display:block;
+        position:absolute;
+        right:200;
+        top:2;
+        z-index:2;
+      }
+      #advancedgomb:hover {
+        background-color:#bbb;
+        border:1px solid #bbb;
+      }
+      #parameterek {
+        background-color:#bbb;
+        padding:10px;
+        color:#222;
+        border: 1px solid #bbb;
+      }
+      ul {
+        list-style-type:none;
+      }
+      ul#kozosnevek {
+        padding-left:0;
+      }
+      ul#kozosnevek>li {
+        overflow:auto;
+        border-bottom:1px solid #ddd;
+        padding:5px;
+        background-color:white;
+      }
+      ul#kozosnevek ul {
+        padding-left:0;
+      }
+      ul#kozosnevek>li .pic_thumbnail {
+        width:64px;
+        height:64px;
+        text-align:center;
+        line-height:64px;
+        float:left;
+        margin-left:20px;
+      }
+      .pic_thumbnail img {
+        vertical-align:middle;
+      }
+      ul#kozosnevek>li .info {
+        float:left;
+        margin-left:20px;
+      }
+      ul#kozosnevek>li .info .nev {
+        color:black;
+        text-decoration:none;
+        font-size:1.5em;
+        font-weight:bold;
+      }
+      ul#kozosnevek>li .info ul {
+        margin-top:5px;
+        width:400px;
+        overflow:auto;
+      }
 
-.selected {
-  background-color:#ddd
-}
-
-.kozos_emberek {
-  list-style:none;
-  border: 1px solid black;
-  overflow: auto;
-  padding-left:0;
-}
-
-.kozos_emberek li {
-  padding:5px;
-  overflow:auto;
-  clear:both;
-}
-
-.kozos_emberek li:nth-child(even) {
-  background-color:#efefef;
-}
-
-.kurzus_emberek li:nth-child(odd) {
-  background-color:#fff;
-}
-
-.kozos_emberek .pic_thumbnail {
-  width: 64px;
-  height: 64px;
-  text-align:center;
-  float:left;
-}
-
-.kozos_emberek .nev {
-  float:left;
-  height: 64px;
-  line-height: 64px;
-  vertical-align:middle;
-  font-size:1.4em;
-}
+      ul#kozosnevek>li .info li a {
+        text-decoration:none;
+        color:black;
+        float:left;
+        background-color:#ddd;
+        -webkit-border-radius:5px;
+        padding:5px;
+        font-size:0.6em;
+        margin-left:5px;
+      }
+      #footer {
+        text-align:center;
+        font-size:0.5em;
+        padding:20px;
+      }
+      
+      #step-2, #step-3, #parameterek {
+        display:none;
+      }

@@ -31,5 +31,14 @@ function addhozza(data) {
       html: this.kurzuskod + " " + this.cim
     }).appendTo("#kurzustabla li:last")
   })
+    $("<button/>", {
+          "html": "mutasd", 
+          "click": function() { alert("bla"); return false }
+        }).appendTo("#kurzustabla")
     $("#login").slideUp()
+    
+}
+
+function kozoskurzusok() {
+  alert(bla)
 }

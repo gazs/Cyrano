@@ -4,6 +4,8 @@ import re
 from google.appengine.api import urlfetch
 
 
+from urllib import urlencode, unquote
+from BeautifulSoup import BeautifulSoup
 
 class IwiwLoginError(Exception):
    def __str__(self):
@@ -16,41 +18,71 @@ class NincsTalalatError(Exception):
       return repr(self.value)
 
 class Iwiw:
-  def showfirstmatch(self, fullname=None, firstName=None, lastName=None, p_country=110, ageFrom=18, gender=None, school_univ="ELTE", withPhoto=1):
-    from urllib import urlencode, unquote
-    url = "http://iwiw.hu/search/pages/user/ajaxsearch.jsp?"
-    parameterek = urlencode({
-                    "do": "AdvancedSearch",
-                    "page": 0,
-                    "regDateYear":2002,
-		    "fullname": fullname,
-                    "firstName": firstName,
-                    "lastName": lastName,
-                    "p_country": p_country,
-                    "ageFrom": ageFrom,
-                    "gender": gender,
-                    "school_univ": school_univ,
-                    "withPhoto": withPhoto
-                  })
-    url += re.sub("&[a-zA-Z]*=None", "", parameterek) # különben hozzáadja a hiányzó paraméterekre, hogy None.
+  def firstn(self, count=5, **kwargs):
+    url = "http://iwiw.hu/search/pages/user/ajaxsearch.jsp?do=AdvancedSearch&page=0&"
+    url += urlencode(kwargs)
+    iwiwsearch = urlfetch.fetch(url, headers={'Cookie': self.logincookie}).content
+    #try:
+    leves = BeautifulSoup(iwiwsearch)
+    mennyivan = len(leves.findAll("div", "cardContainer"))
+    count=int(count)
+    if mennyivan - count >= 0:
+      mennyit = count
+    if mennyivan - count < 0:
+      mennyit = mennyivan
+    results = []
+    for i in range(mennyit):
+      ez = leves.findAll("div", "cardContainer")[i]
+      # userid = ez.find("a")["name"].replace("uid","")
+      ebben_van_a_popup_url = ez.findChildren("a")[2]["onclick"]
+      pic_popup_url = re.search("'.*?'", ebben_van_a_popup_url).group(0)
+      pic_thumbnail = ez.img["src"]
+      name = ez.findChildren("a")[1].contents[0]
+      profile_url = ez.findChildren("a")[1]["href"]
+      result = {
+          "name": name,
+          "profile_url": profile_url,
+          "pic_thumbnail": pic_thumbnail,
+          "pic_popup_url": pic_popup_url
+          }
+      # result beleírása
+      results.append(result)
+    return results
+    #except AttributeError:
+    #  raise NincsTalalatError(url)
+  def showfirstmatch(self, **kwargs):
+    url = "http://iwiw.hu/search/pages/user/ajaxsearch.jsp?do=AdvancedSearch&page=0&"
+    url += urlencode(kwargs)
     iwiwsearch = urlfetch.fetch(url, headers={'Cookie': self.logincookie}).content
     try:
-      userid = re.search("userID=([0-9]*)", iwiwsearch ).group(1)
-      pic_thumbnail = re.search("<img.*src=\"(.*?)\"", iwiwsearch).group(1)
+      leves = BeautifulSoup(iwiwsearch)
+      # userid = re.search("userID=([0-9]*)", iwiwsearch ).group(1)
+      # pic_thumbnail = re.search("<img.*src=\"(.*?)\"", iwiwsearch).group(1)
       pic_popup_url = re.search("/pages/main/imageview.jsp\?.*?'", iwiwsearch).group(0).replace("&amp;", "&")
+      name = leves.find("div", "cardContainer").findChild("a").findNextSibling().text 
+      profile_url = leves.find("div", "cardContainer").findChild("a").findNextSibling()["href"]
+      pic_thumbnail = leves.find("div", "cardContainer").img["src"]
       result = {
-        "userid": userid, 
+        "searchurl": url,
+        "profile_url": profile_url,
+        #"userid": userid, 
+        "name": name,
         "pic_thumbnail": pic_thumbnail, 
         "pic_popup_url": pic_popup_url,
       }
       return result
     except AttributeError:
-      raise NincsTalalatError(parameterek)
-  def __init__(self, email="iwiw@bergengocia.net", password="asdfasdf"):
-    loginurl = "http://iwiw.hu/pages/user/login.jsp?method=Login&email="+ email + "&password="+ password
-    result = urlfetch.fetch(loginurl, follow_redirects=False)
-    if (re.search("autoLoginLimited", result.headers.get('set-cookie', '')) ):
-      self.logincookie = result.headers.get('set-cookie', '')
+      raise NincsTalalatError(url)
+  def __init__(self, email="iwiw@bergengocia.net", password="asdfasdf", logincookie="JSESSIONID=1267529305187_oxMjcxYzk0NzgxYTo3MTlk5267843077287685; Path=/, password=5ca9030fb22494a0e2866d02b3bfdfa1; Expires=Tue, 19-Oct-2010 23:01:45 GMT; Path=/, autoLoginLimited=0; Expires=Thu, 01-Jan-1970 00:00:10 GMT; Path=/, autoLoginLimited=0; Expires=Thu, 01-Jan-1970 00:00:10 GMT, autoLogin=0; Expires=Thu, 01-Jan-1970 00:00:10 GMT; Path=/, autoLogin=0; Expires=Thu, 01-Jan-1970 00:00:10 GMT, autoLoginNew=1; Expires=Sun, 29-Aug-2010 11:28:25 GMT; Path=/, forgetEmail=0; Expires=Tue, 19-Oct-2010 23:01:45 GMT; Path=/, email=aXdpd0BiZXJnZW5nb2NpYS5uZXQ$; Expires=Tue, 19-Oct-2010 23:01:45 GMT; Path=/, httpslogin=0; Expires=Tue, 19-Oct-2010 23:01:45 GMT; Path=/"):
+    if logincookie:
+      # bejelentkezés is for losers
+      self.logincookie = logincookie
     else:
-      raise IwiwLoginError
+      loginurl = "http://iwiw.hu/pages/user/login.jsp?method=Login&&loginradio=1&email="+ email + "&password="+ password
+      result = urlfetch.fetch(loginurl, follow_redirects=False)
+      if (re.search("autoLoginLimited", result.headers.get('set-cookie', '')) ):
+        print result.headers.get('set-cookie', '')
+        self.logincookie = result.headers.get('set-cookie', '')
+      else:
+        raise IwiwLoginError
 

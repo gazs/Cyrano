@@ -1,20 +1,100 @@
 {% extends "base.html" %}
-
 {% block content %}
-<script src="/static/cucc.js"></script>
-<div id="login">
-	<form method="post" action="#" name="varazslat" id="varazslat">    
-		<label for="felhasznalonev">eha kód</label> <input type="text" class="text" name="felhasznalonev" />
-		<label for="jelszo">jelszó</label> <input type="password" class="text" name="jelszo" />
-		<button type="submit">bejelentkezés</button>
-	</form>
-</div>
-<div class="span-8">
-	<form method="post" action="#" id="bla">
-		<ul id="kurzustabla">
+<p>Nem tudod a nevét sem? Mi segítünk megtalálni.</p>
+<p style="font-weight:bold;background-color:red; color:white; padding:5px; text-align:center;">Ez egy nagyon korai béta. Váratlan helyeken törhet. A hibák kijavításán aktívan dolgozunk.</p>
+<script>
+nevek = []
+showiwiw = function(nev) {
+  $.get("/iwiw/firstmatch", "count=1&firstName=" + encodeURI(nev.split(" ")[1]) + "&lastName=" + encodeURI(nev.split(" ")[0])   + "&" + $("#teszta").serialize(), addlist, "json")
 
-		</ul>
-	</form>
-</div>
+}
 
+addlist = function(data) {
+  $("<li>").append($("<a>", {"class": "pic_thumbnail", "href": "http://iwiw.hu/" + data[0].pic_popup_url, "target": "_blank"}).append($("<img>", {"src": data[0].pic_thumbnail})))
+           .append($("<div>", {"class": "info"}).append($("<a>", {"href": "http://iwiw.hu/" + data[0].profile_url, "class": "nev", html: data[0].name}))
+            .append($("<ul>").append($("<li>").append($("<a>", {"href": "http://iwiw.hu/pages/user/advancedsearch.jsp?showform=true", "html": ""})))))
+    .appendTo("#kozosnevek")
+}
+
+$(document).ready(function() { 
+  
+  $("#login").submit(function() {
+    $("#login input:submit").attr('disabled', 'true').val('türelem tornaterem...')
+    $.post("/etr/kurzustabla", $(this).serialize(), function(data) {
+      $.each(data, function() {
+        $("<li/ >").append($("<input>", {"type": "checkbox", "name": "kurzus", "id":this.kurzusid, "value":this.kurzusid})).append($("<label>", {"for":this.kurzusid, "html": this.kurzuskod + " - " + this.cim})).appendTo("#kurzusok")
+      })
+      $("#step-1").slideUp();
+      $("#step-2").slideDown();
+    }, "json");
+    return false;
+  })
+  
+  $("#kurzusos").submit(function() {
+    $("#kozosnevek").empty()
+    $("#kurzusos input:submit").attr('disabled', 'true').val('türelem tornaterem...')
+    $.post("/kozos", $("#login").serialize() + "&" + $("#kurzusos").serialize(), function(data){
+      $.each(data, function(index, row) {  showiwiw(row) })
+      nevek = data;
+      $("#kurzusos input:submit").removeAttr('disabled').val('mutasd');
+      $("#step-3 .description").html( $("#kozosnevek li").length + " / " + nevek.length + " találatot mutatok:" )
+      $("#step-3").slideDown();
+    }, "json" );
+    return false;
+  })
+  
+  $("#advancedgomb").click(function() {
+    $("#advancedgomb").css('border', 'none')
+    $("#parameterek").slideToggle('fast'); return false 
+  })
+  $("#refresgomb").click(function() {
+    $("#kozosnevek").empty()
+    $.each(nevek, function(index,row) { showiwiw(row) })
+    return false;
+  }) 
+})
+</script>
+    <div id="step-1">
+      <h2>bejelentkezés</h2>
+      <p class="description">
+        a szolgáltatás használatához be kell jelentkezned az etr-es felhasználóneveddel és jelszavaddal. a jelszavadat semmi másra nem használjuk fel, és semmilyen formában nem tároljuk el. 
+        <a href="/about#jelszo" title="adatvédelem, ilyesmi">további információ</a>
+      </p>
+      <form id="login">
+        <label for="felhasznalonev">Usernév</label> <input id="felhasznalonev" name="felhasznalonev" type="text" value="">
+        <label for="jelszo">jelszó</label> <input id="jelszo" name="jelszo" type="password" value="">
+        <input type="submit" value="belép">
+      </form> 
+    </div>
+    <div id="step-2">
+      <h2>közös kurzusok</h2>
+      <p class="description">jelöld be, melyik órákra jártok együtt:</p>
+      <form id="kurzusos">
+      <ul id="kurzusok">
+<!-- ide töltjük be a kurzusokat kiválasztós dobozt -->
+      </ul>
+      <input type="submit" value="mutasd">
+      </form>
+    </div>
+    <div id="step-3">
+      <h2>közös nevek</h2>
+      <div id="szuro">
+      <!-- h3>szűrd</h3 -->
+      <form id="teszta">
+      <input type="radio" name="gender" value="0" id="lany"><label for="lany" class="dzsendor">lány</label>
+      <input type="radio" name="gender" value="1" id="fiu"><label for="fiu" class="dzsendor">fiú</label>
+      <a href="#" id="advancedgomb">szűrd...</a>
+      <div id="parameterek">
+        <label for="middleName">becenév</label><input type="text" name="middleName" id="middleName"><br/>
+        <label for="ageFrom">életkor</label><input type="number" size=2 value=18 name="ageFrom" id="ageFrom">-tól <input type="number" size=2 name="ageTo" id="ageTo">-ig<br/>
+        <label for="school_univ">egyetem</label><input type="text" value="ELTE" name="school_univ" id="school_univ"><br/>
+        <input type="checkbox" id=withPhoto" name="withPhoto" value="1" checked="true"><label for=withPhoto">csak fényképes</label>
+        <a href="#" id="refresgomb">refresh</a>
+      </div>
+      </form>
+     </div>
+      <p class="description">a kijelölt kurzusokon ők a közös nevek, akik megfelelnek a megadott feltételeknek:</p>
+      <ul id="kozosnevek">
+     </ul>
+    </div>
 {% endblock %}
