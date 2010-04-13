@@ -1,0 +1,140 @@
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>keresődoboz</title>
+    <script src="../static/jquery-1.4.2.min.js"></script>
+    <script>
+      nyutoken = function(szoveg, melyik) {
+        if (!$("#token-" + melyik).length) {
+          $(".filterek").append($("<span>", {
+             "class":"token", 
+             "id": "token-" + melyik,
+             "html": szoveg, 
+             "title": "A szűrési feltétel törléséhez kattints ide",
+             "click": function(){ 
+               $(this).remove();
+               $("#filter input[name='"+ melyik +"']").attr("checked", false).val("");
+               //nemígykéne, hanem általánosabban, éló:
+               if (melyik === "ageFrom") {
+                 $("#filter input[name='"+ melyik +"']").val("18");
+               }
+             } 
+          }))
+        } else {
+          $("#token-" + melyik).text(szoveg);
+        }
+      }
+
+      $(document).ready(function() {
+        $("#filtergomb").click(function() {
+          $("#filter").toggle();
+          $("#filtergomb").toggleClass("clicked");
+        })
+        $("input[name='gender']").change(function() {
+          nyutoken( $("label[for='"+ this.id +"']").text() , "gender" );
+        })        
+        $("input[name='withPhoto']").change(function() {
+          if ( $(this).is(":checked") ) {
+            nyutoken("fényképpel rendelkező", "withPhoto") ;
+          } 
+          else {
+            $("#token-withPhoto").remove();
+          }
+        })
+        $("input[name='ageFrom']").change(function() {
+         nyutoken( $(this).val() + " évnél idősebb", "ageFrom") 
+        })
+        $("input[name='ageTo']").change(function() {
+         nyutoken( $(this).val() + " évnél fiatalabb", "ageTo") 
+        })
+      })
+    </script>
+    <style>
+      body {
+        background-color:white;
+        color:black;
+        font-family:Helvetica,Arial,sans
+      }
+      h2 {
+        font-size:24px;
+      }
+      #filtergomb {
+        color:black;
+        text-decoration:none;
+        border-bottom: 3px dotted black;
+        padding:5px 5px 0px 5px;
+      }
+      #filtergomb.clicked {
+        background-color: #444;
+        color:white;
+-webkit-border-top-left-radius: 5px;
+-webkit-border-top-right-radius: 5px;
+-webkit-border-bottom-right-radius: 0px;
+-webkit-border-bottom-left-radius: 0px;
+-moz-border-radius-topleft: 5px;
+-moz-border-radius-topright: 5px;
+-moz-border-radius-bottomright: 0px;
+-moz-border-radius-bottomleft: 0px;
+border-top-left-radius: 5px;
+border-top-right-radius: 5px;
+border-bottom-right-radius: 0px;
+border-bottom-left-radius: 0px;
+      }
+      #filtergomb:after {content: "▼"; font-size:12px}
+      #filtergomb.clicked:after {content: "▲"}
+      
+      .token {$("#filtergomb:after").
+        -webkit-border-radius: 2px;
+        -moz-border-radius: 2px;
+        border-radius: 2px;    
+        background-color:#C9DEF2;
+        border: 1px solid #819BB5;
+        padding:0px 8px 0px 8px;
+        margin: 0px 2px 0px 2px;
+        cursor: pointer;
+      }
+
+       .token:hover {
+        background-color:#E2F3C9;
+        border-color:#A2B882;
+      }
+      .token:after {
+        content: "x";
+        font-size:15px;
+        padding:2px;
+        color:#E11411; 
+        vertical-align:middle;
+      }
+      .tobbesszam {
+        display:none;
+      }
+      #filter {
+        display:none;
+        color:white;
+        background-color:#444;
+        position:absolute;
+        top:37px;
+        width:400px;
+        padding:5px;
+      }
+    </style>
+  </head>
+  <body>
+    <h2><a href="#" title="Szűrési feltételek beállításához kattints ide" id="filtergomb">Összes</a> <span class="filterek"></span> csoptárs, aki a kijelölt kurzus<span class="tobbesszam">ok</span>ra veled jár:</h2>
+    <div id="filter">
+      <form>
+      <input type="radio" name="gender" value="0" id="lany"><label for="lany" class="dzsendor">lány</label>
+      <input type="radio" name="gender" value="1" id="fiu"><label for="fiu" class="dzsendor">fiú</label>
+      <input type="checkbox" id=withPhoto" name="withPhoto" value="0" ><label for=withPhoto">csak fényképes</label><br>
+      <label for="ageFrom">életkor</label><input type="number" size=2 value=18 name="ageFrom" id="ageFrom">-tól <input type="number" size=2 name="ageTo" id="ageTo">-ig<br/>
+        <!--becenév
+        életkor
+        nem
+        szak
+        kép
+        magamról
+        családi állapot -->
+      </form>
+    </div> 
+  </body>
+</html>
