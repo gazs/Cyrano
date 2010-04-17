@@ -1,0 +1,130 @@
+    body {
+      background-color:white;
+      color:black;
+      font-family:Helvetica,Arial,sans;
+      width:800px;
+    }
+
+    h2 {
+      font-size:24px;
+    }
+    .filtergomb {
+      color:black;
+      text-decoration:none;
+      border-bottom: 3px dotted black;
+      padding:5px 5px 0px 5px;
+    }
+    .filtergomb.clicked {
+      background-color: #444;
+      color:white;
+      -webkit-border-top-left-radius: 5px;
+      -webkit-border-top-right-radius: 5px;
+      -webkit-border-bottom-right-radius: 0px;
+      -webkit-border-bottom-left-radius: 0px;
+      -moz-border-radius-topleft: 5px;
+      -moz-border-radius-topright: 5px;
+      -moz-border-radius-bottomright: 0px;
+      -moz-border-radius-bottomleft: 0px;
+      border-top-left-radius: 5px;
+      border-top-right-radius: 5px;
+      border-bottom-right-radius: 0px;
+      border-bottom-left-radius: 0px;
+    }
+    .filtergomb:after {content: "▼"; font-size:12px}
+    .filtergomb.clicked:after {content: "▲"}
+
+    .token {
+      -webkit-user-select:none;
+      -moz-user-select:none;
+      -webkit-border-radius: 2px;
+      -moz-border-radius: 2px;
+      border-radius: 2px;    
+      background-color:#C9DEF2;
+      border: 1px solid #819BB5;
+      padding:0px 8px 0px 8px;
+      margin: 0px 2px 0px 2px;
+      cursor: pointer;
+    }
+
+    .token:hover {
+      background-color:#E2F3C9;
+      border-color:#A2B882;
+    }
+    .token:after {
+      content: "x";
+      font-size:15px;
+      padding:2px;
+      color:#E11411; 
+      vertical-align:middle;
+    }
+    .tobbesszam {
+      /*  display:none; */
+    }
+    .filter {
+      display:none;
+      color:white;
+      background-color:#444;
+      padding:5px;
+      width:400px;
+      position:absolute;
+    }
+    .filter#iwiw {
+      top:37px;
+    }
+
+    /* kártyák a harmadik lépéshez */
+          .hcard {
+        display:inline;
+        clear:none;
+        text-align:left;
+        width: 170px;
+        border: 2px solid silver;
+        float:left;
+        padding:10px;
+        margin:10px;
+        position:relative;
+        overflow:auto;
+      }
+      .hcard .nickname {
+        font-weight:bold;
+        color: #006;
+      }
+      .hcard .url {
+        text-decoration:none;
+        color: #63A900;
+        font-size:0.8em;
+        font-weight:bold;
+      }
+      .hcard .profilepic {
+        position:absolute;
+        top:10px;
+        right:10px;
+        display:block;
+        float:right;
+        width:64px;
+        height:64px;
+        line-height:64px;
+        border:1px solid silver;
+      }
+      .hcard .profilepic .photo {
+        border:none;
+        vertical-align:middle;
+      }
+      .hkartotek {
+        text-align:center;
+        font-weight:bold;
+        float:left;
+        background-color:#fefefe;
+        height:200px;
+        width:212px;
+        margin:10px;
+      }
+      .doboz {
+        width:212px;
+        overflow-x:scroll;
+        overflow-y:hidden;
+      }
+      .csuszka { 
+        width:100%;
+        overflow:auto 
+      }
