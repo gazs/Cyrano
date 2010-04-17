@@ -1,0 +1,102 @@
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>adatlap</title>
+    <script src="../static/jquery-1.4.2.min.js"></script>
+    <script>
+  adat = [{"pic_popup_url": "\/pages\/main\/imageview.jsp?imageID=74506730&ownerID=8465997&type=user", "pic_thumbnail": "http:\/\/ths6.iwiw.hu\/0601\/user\/00\/84\/65\/99\/7\/user_8465997_1219957165221_tn", "name": "K\u00f6rtesi G\u00e1sp\u00e1r ", "city": "Dsasdf", "nick": "Gazs[i]", "profile_url": "\/pages\/user\/userdata.jsp?userID=8465997"}, {"pic_popup_url": "\/pages\/main\/imageview.jsp?imageID=74506730&ownerID=8465997&type=user", "pic_thumbnail": "http:\/\/ths6.iwiw.hu\/0601\/user\/00\/84\/65\/99\/7\/user_8465997_1219957165221_tn", "name": "K\u00f6rtesi G\u00e1sp\u00e1r ", "city": "Dfsdf", "nick": "Gazs[i]", "profile_url": "\/pages\/user\/userdata.jsp?userID=8465997"}] 
+
+
+  function render_kartya (adat) {
+    prefix = "http://iwiw.hu"
+    $("<div>", {"class": "hkartotek"})
+      .append ( $("<div>", {"html": "Asadf Jkle"}) ) 
+        .append ( $("<a>", {"href":"#","html": "&larr;", "click": function() { if ( $(this).siblings(".doboz").scrollLeft() !== 0) { $(this).siblings(".doboz").scrollLeft( $(".doboz").scrollLeft() - 212 ) }; return false; } }) )
+      .append ( $("<a>", {"href": "#", "html": "&rarr;", "click": function() { if ( $(this).siblings(".doboz").scrollLeft() !== $(this).siblings(".csuszka").width() ) { $(this).siblings(".doboz").scrollLeft( $(this).siblings(".doboz").scrollLeft() + 212 ) }; return false; } }) )
+      .append ( $("<div>", {"class": "doboz"}).append( $("<div>", {"class":"csuszka"}) ) )
+      .appendTo("body");
+      $.each(adat, function(i, lap) {
+        $("<div>", {"class": "hcard"})
+          .append( $("<div>", {"class": "fn nickname", "html": lap.nick, "title": lap.name}) )
+          .append( $("<div>", {"class": "adr locality", "html": lap.city}) )
+          .append( $("<a>", {"class": "url", "html": "További info &gt; &gt;", "title": "Mutasd a kapcsolódó iWiW profilt", "href": prefix + lap.profile_url, "target": "_blank"}) )
+          .append( $("<a>", {"class": "profilepic", "href": prefix + lap.pic_popup_url}).append( $("<img>", {"src": lap.pic_thumbnail, "class": "photo"}) ) )
+          .appendTo(".hkartotek:last .csuszka");
+        })
+     $(".hkartotek:last .csuszka").css("width", adat.length * 215)
+  }
+
+
+$(document).ready(function() {
+      render_kartya(adat);
+
+});
+    </script>
+    <style>
+
+      body {
+        font-family:Helvetica, Arial, sans;
+        color:black;
+        background:white;
+      }
+      .hcard {
+        display:inline;
+        clear:none;
+        text-align:left;
+        width: 170px;
+        border: 2px solid silver;
+        float:left;
+        padding:10px;
+        margin:10px;
+        position:relative;
+        overflow:auto;
+      }
+      .hcard .nickname {
+        font-weight:bold;
+        color: #006;
+      }
+      .hcard .url {
+        text-decoration:none;
+        color: #63A900;
+        font-size:0.8em;
+        font-weight:bold;
+      }
+      .hcard .profilepic {
+        position:absolute;
+        top:10px;
+        right:10px;
+        display:block;
+        float:right;
+        width:64px;
+        height:64px;
+        line-height:64px;
+        border:1px solid silver;
+      }
+      .hcard .profilepic .photo {
+        border:none;
+        vertical-align:middle;
+      }
+      .hkartotek {
+        text-align:center;
+        font-weight:bold;
+        float:left;
+        background-color:#fefefe;
+        height:200px;
+        width:212px;
+        margin:10px;
+      }
+      .doboz {
+        width:212px;
+        overflow-x:scroll;
+        overflow-y:hidden;
+      }
+      .csuszka { 
+        width:100%;
+        overflow:auto 
+      }
+
+    </style>
+  </head>
+  <body>
+  </body>
+</html>
