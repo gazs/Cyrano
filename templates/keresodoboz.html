@@ -4,19 +4,59 @@
     <title>keresődoboz</title>
     <script src="../static/jquery-1.4.2.min.js"></script>
     <script>
+toldalekol = function(string) {
+  var utolso_karakter = string.charAt(string.length-1);
+  var magas_maganhangzok = ["e", "é", "í", "ö", "ő", "ü", "ű"];
+  var mely_maganhangzok = ["a", "á", "o", "ó", "u", "ú", ];
+  if ( utolso_karakter === utolso_karakter.toUpperCase() ) {
+    // többesszám lecsalható.
+    return string + "-s";
+  } else if ( magas_maganhangzok.indexOf(utolso_karakter) >= 0 || mely_maganhangzok.indexOf(utolso_karakter) >= 0) {
+    // ha benne van az indexben, akkor magánhangzó. végére csapunk egy s-t. kivéve: eszperente -> eszperentés
+    if (utolso_karakter === "e") {
+      return string.replace(/e$/, "és");
+    }
+    if (utolso_karakter === "a") {
+      return string.replace(/a$/, "ás");
+    } 
+    else return string + "s";
+  } else if ( magas_maganhangzok.indexOf(utolso_karakter) < 0  || mely_maganhangzok.indexOf(utolso_karakter) >= 0) {
+    // ha nincs benne az indexben, -1 az eredmény. tehát mássalhangzó.
+    // az utolsó magánhangzó alapján hangrend.
+    var pozicio = string.length-2; // azt már tudjuk, hogy nem az utolsó
+    for ( i=pozicio; i>=0; i-- ) {
+      if ( magas_maganhangzok.indexOf(string[i]) >= 0 || mely_maganhangzok.indexOf(string[i]) >= 0 ) {
+      // itt az utolsó magánhangzó. mély vagy magas?
+      if ( magas_maganhangzok.indexOf(string[i]) >= 0 ) {
+        return string + "es"; 
+      } else {
+        return string + "os";
+      }
+      break;
+    } else {
+        return string + "-s"
+      }
+
+    } 
+
+  }
+}
+
+
+
       nyutoken = function(szoveg, melyik) {
         if (!$("#token-" + melyik).length) {
           $(".filterek").append($("<span>", {
              "class":"token", 
              "id": "token-" + melyik,
-             "html": szoveg, 
+             "html": szoveg.replace(/ /g, "&nbsp;"), 
              "title": "A szűrési feltétel törléséhez kattints ide",
              "click": function(){ 
                $(this).remove();
-               $("#filter input[name='"+ melyik +"']").attr("checked", false).val("");
+               $("#iwiw input[name='"+ melyik +"']").attr("checked", false).val("");
                //nemígykéne, hanem általánosabban, éló:
                if (melyik === "ageFrom") {
-                 $("#filter input[name='"+ melyik +"']").val("18");
+                 $("#iwiw input[name='"+ melyik +"']").val("18");
                }
              } 
           }))
@@ -26,9 +66,17 @@
       }
 
       $(document).ready(function() {
-        $("#filtergomb").click(function() {
-          $("#filter").toggle();
-          $("#filtergomb").toggleClass("clicked");
+        $("#filter-iwiw").click(function() {
+          $(".filter#iwiw").css({"top": $("#filter-iwiw").position().top + $("#filter-iwiw").height(), "left":  $("#filter-iwiw").position().left }).toggle();
+          $(".filter#kurzus").hide();
+          $("#filter-kurzus").removeClass("clicked");
+          $("#filter-iwiw").toggleClass("clicked");
+        })
+        $("#filter-kurzus").click(function() {
+          $("#filter-iwiw").removeClass("clicked");
+          $(".filter#iwiw").hide();
+          $(".filter#kurzus").css({"top": $("#filter-kurzus").position().top + 5 + $("#filter-kurzus").height(), "left":  $("#filter-kurzus").position().left }).toggle();
+          $("#filter-kurzus").toggleClass("clicked");
         })
         $("input[name='gender']").change(function() {
           nyutoken( $("label[for='"+ this.id +"']").text() , "gender" );
@@ -47,24 +95,41 @@
         $("input[name='ageTo']").change(function() {
          nyutoken( $(this).val() + " évnél fiatalabb", "ageTo") 
         })
+        $("input[name='univ']").change(function() {
+         nyutoken( toldalekol($(this).val()), "univ")
+        })
+	$("#kurzus form").change(function() {
+		var darab = $("#kurzus form input:checked").length;
+	  if (darab === 0) {
+	        $("#kurzus-count").text("")
+      		$(".tobbesszam").show()
+   	 }
+	 else {
+	        $(".tobbesszam").hide();
+	        $("#kurzus-count").text(darab)
+    	}
+	})
+
+
       })
     </script>
     <style>
       body {
         background-color:white;
         color:black;
-        font-family:Helvetica,Arial,sans
+        font-family:Helvetica,Arial,sans;
+        width:800px;
       }
       h2 {
         font-size:24px;
       }
-      #filtergomb {
+      .filtergomb {
         color:black;
         text-decoration:none;
         border-bottom: 3px dotted black;
         padding:5px 5px 0px 5px;
       }
-      #filtergomb.clicked {
+      .filtergomb.clicked {
         background-color: #444;
         color:white;
 -webkit-border-top-left-radius: 5px;
@@ -80,10 +145,12 @@ border-top-right-radius: 5px;
 border-bottom-right-radius: 0px;
 border-bottom-left-radius: 0px;
       }
-      #filtergomb:after {content: "▼"; font-size:12px}
-      #filtergomb.clicked:after {content: "▲"}
+      .filtergomb:after {content: "▼"; font-size:12px}
+      .filtergomb.clicked:after {content: "▲"}
       
-      .token {$("#filtergomb:after").
+      .token {
+        -webkit-user-select:none;
+        -moz-user-select:none;
         -webkit-border-radius: 2px;
         -moz-border-radius: 2px;
         border-radius: 2px;    
@@ -106,27 +173,31 @@ border-bottom-left-radius: 0px;
         vertical-align:middle;
       }
       .tobbesszam {
-        display:none;
+      /*  display:none; */
       }
-      #filter {
+      .filter {
         display:none;
         color:white;
         background-color:#444;
-        position:absolute;
-        top:37px;
-        width:400px;
         padding:5px;
+        width:400px;
+        position:absolute;
+      }
+      .filter#iwiw {
+        top:37px;
       }
     </style>
   </head>
   <body>
-    <h2><a href="#" title="Szűrési feltételek beállításához kattints ide" id="filtergomb">Összes</a> <span class="filterek"></span> csoptárs, aki a kijelölt kurzus<span class="tobbesszam">ok</span>ra veled jár:</h2>
-    <div id="filter">
-      <form>
+    <h1>Cyrano</h1>
+    <h2>Mutasd az <a href="#" title="Szűrési feltételek beállításához kattints ide" id="filter-iwiw" class="filtergomb">összes</a> <span class="filterek"></span> csoptársat, akivel a <a href="#" id="filter-kurzus" class="filtergomb">kijelölt <span id="kurzus-count"></span> kurzus<span class="tobbesszam">ok</span>ra</a> együtt járok:</h2>
+    <div id="iwiw" class="filter">
+      <form onsubmit="return false">
       <input type="radio" name="gender" value="0" id="lany"><label for="lany" class="dzsendor">lány</label>
       <input type="radio" name="gender" value="1" id="fiu"><label for="fiu" class="dzsendor">fiú</label>
       <input type="checkbox" id=withPhoto" name="withPhoto" value="0" ><label for=withPhoto">csak fényképes</label><br>
       <label for="ageFrom">életkor</label><input type="number" size=2 value=18 name="ageFrom" id="ageFrom">-tól <input type="number" size=2 name="ageTo" id="ageTo">-ig<br/>
+      <label for="univ">szak</label><input type="text" name="univ" id="univ" value="ELTE">
         <!--becenév
         életkor
         nem
@@ -136,5 +207,13 @@ border-bottom-left-radius: 0px;
         családi állapot -->
       </form>
     </div> 
+    <div id="kurzus" class="filter">
+      <form onsubmit="return false">
+      <ul>
+        <li><input type="checkbox" id="kurzus-1"><label for="kurzus-1">Egyedem begyedem tengertánc</label></li>
+        <li><input type="checkbox" id="kurzus-2"><label for="kurzus-2">Hajdú sógor mit kívánsz?</label></li>
+      </ul>
+      </form>
+    </div>
   </body>
 </html>
