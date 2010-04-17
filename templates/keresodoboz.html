@@ -110,6 +110,11 @@ toldalekol = function(string) {
     	}
 	})
 
+$(".filter").mouseleave(function() {
+//ez konkrétan undorító. ez az automatikus becsukódása a részletpickernek, de fúúj.
+$(".filter").hide();
+$(".filtergomb").removeClass("clicked");
+})
 
       })
     </script>
