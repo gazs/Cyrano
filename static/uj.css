@@ -128,3 +128,9 @@
         width:100%;
         overflow:auto 
       }
+      
+.error {
+  background-color:red;
+  color:white;
+  display:none;
+}

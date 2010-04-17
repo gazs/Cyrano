@@ -136,12 +136,38 @@ $(".filter").hide();
 $(".filtergomb").removeClass("clicked");
 })
 
-      })
+//kurzuslista benépesítése: volt step-2
+$("#login").submit(function() {
+  $("#login :submit").val("(pillanat, ez kicsit lassan szokott menni)").attr("disabled", true)
+  $.ajax({
+    "type": "POST",
+    "url": "/etr/kurzustabla",
+    "data": $(this).serialize(),
+    "success": function(data) { 
+      $.each(data, function() {
+        $("<li/ >").append($("<input>", {"type": "checkbox", "name": "kurzus", "id":this.kurzusid, "value":this.kurzusid})).append($("<label>", {"for":this.kurzusid, "html": this.kurzuskod + " - " + this.cim})).appendTo("#kurzus form ul")
+        })
+        $("#login").hide()
+      },
+      "error": function(data) { $("#error-login").show() },
+      "dataType": "json"
+    })
+    return false
+  })
+
+})
+
     </script>
     <link rel="stylesheet" href="../static/uj.css">
   </head>
   <body>
     <h1>Cyrano</h1>
+    <form id="login" > 
+      <label for="felhasznalonev">ETR felhasználónév</label> <input id="felhasznalonev" name="felhasznalonev" type="text" value=""> 
+      <label for="jelszo">jelszó</label> <input id="jelszo" name="jelszo" type="password" value=""> 
+      <input type="submit" value="bejelentkezem"> 
+    </form> 
+    <div id="error-login" class="error">Nem sikerült bejelentkezni. Ellenőrizd jól írtad-e a jelszavad.</div>
     <h2>Mutasd az <a href="#" title="Szűrési feltételek beállításához kattints ide" id="filter-iwiw" class="filtergomb">összes</a> <span class="filterek"></span> csoptársat, akivel a <a href="#" id="filter-kurzus" class="filtergomb">kijelölt <span id="kurzus-count"></span> kurzus<span class="tobbesszam">ok</span>ra</a> együtt járok:</h2>
     <div id="iwiw" class="filter">
       <form onsubmit="return false">
@@ -162,8 +188,6 @@ $(".filtergomb").removeClass("clicked");
     <div id="kurzus" class="filter">
       <form onsubmit="return false">
       <ul>
-        <li><input type="checkbox" id="kurzus-1"><label for="kurzus-1">Egyedem begyedem tengertánc</label></li>
-        <li><input type="checkbox" id="kurzus-2"><label for="kurzus-2">Hajdú sógor mit kívánsz?</label></li>
       </ul>
       </form>
     </div>
