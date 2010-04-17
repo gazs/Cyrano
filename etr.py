@@ -63,4 +63,6 @@ class Etr:
     self._browser["uname"] = uname
     self._browser["pwd"] = pwd 
     login = self._browser.submit()
-
+    csekk = self._browser.response().read()
+    if re.search("sikertelen", csekk):
+      raise BaseException

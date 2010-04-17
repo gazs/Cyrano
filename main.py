@@ -57,9 +57,9 @@ class IwiwSearch(webapp.RequestHandler):
     try:
       eredmeny = iwiw.search(**params)
       self.response.out.write(simplejson.dumps(eredmeny))
-    except Error:
-      self.response.out.write("bla")
-      #self.error(404)
+    except UnboundLocalError:
+      #self.response.out.write("bla")
+      self.error(404)
 
 class IwiwFirstMatch(webapp.RequestHandler):
   def get(self):
@@ -88,17 +88,14 @@ class AboutPage(webapp.RequestHandler):
 class MainHandler(webapp.RequestHandler):
 
   def get(self):
-    template_values = {
-      "text" : "hello world"  
-    }
-    path = os.path.join(os.path.dirname(__file__), 'templates/index.html')
+    path = os.path.join(os.path.dirname(__file__), 'templates/uj-index.html')
     self.response.out.write(template.render(path, template_values))
-
+    #self.response.out.write("hamarosan, most már tényleg!")
     
 
 def main():
   logging.getLogger().setLevel(logging.ERROR)
-  application = webapp.WSGIApplication([('/', MainHandler),
+  application = webapp.WSGIApplication([#('/', MainHandler),
                                         ('/about', AboutPage),
                                         ('/etr/kurzustabla', KurzustablaHandler),
                                         ('/kozos', KozosHandler),
