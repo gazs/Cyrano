@@ -1,11 +1,16 @@
 # -*- coding: utf-8 -*-
-
+import logging
 import re
 from google.appengine.api import urlfetch
+
+from google.appengine.api import memcache
 
 
 from urllib import urlencode, unquote
 from BeautifulSoup import BeautifulSoup
+
+logging.getLogger().setLevel(logging.DEBUG)
+
 
 class IwiwLoginError(Exception):
    def __str__(self):
@@ -19,33 +24,39 @@ class NincsTalalatError(Exception):
 
 class Iwiw:
   def search(self, **searchparams):
-    searchurl = "http://iwiw.hu/search/pages/user/ajaxsearch.jsp?do=AdvancedSearch&page=0&"
-    iwiwsearch = urlfetch.fetch(searchurl + urlencode(searchparams), headers={'Cookie': self.logincookie}).content
-    leves = BeautifulSoup(iwiwsearch)
-    cuccok = []
-    for kartya in leves.findAll("div", "cardContainer"):
-      nev = kartya.findAll("a")[1].string.strip()
-      name = nev.split("[")[0]
-      try:
-        nick = re.search("\[(?P<nick>.*)\]", nev).group(1)
-      except AttributeError:
-        nick = ""
-      profile_url = kartya.findAll("a")[1]["href"]
-      try:
-         pic_popup_url = kartya.find("a", "user_image")["onclick"].split("'")[1]
-      except KeyError:
-        pic_popup_url = ""
-      try:
-        pic_thumbnail = kartya.find("a", "user_image").img["src"]
-      except KeyError:
-        pic_thumbnail = ""
-      try:
-        city = kartya.find("div", "city").string.strip()
-      except AttributeError:
-        city = ""
-      tutu = {"name": name, "nick": nick, "profile_url": profile_url, "pic_popup_url": pic_popup_url, "pic_thumbnail": pic_thumbnail, "city": city}
-    cuccok.append(tutu)
-    return cuccok
+    results = memcache.get(urlencode(searchparams))
+    if results is not None:
+      return results
+    else:
+      searchurl = "http://iwiw.hu/search/pages/user/ajaxsearch.jsp?do=AdvancedSearch&page=0&"
+      iwiwsearch = urlfetch.fetch(searchurl + urlencode(searchparams), headers={'Cookie': self.logincookie}).content
+      leves = BeautifulSoup(iwiwsearch)
+      cuccok = []
+      for kartya in leves.findAll("div", "cardContainer"):
+        nev = kartya.findAll("a")[1].string.strip()
+        name = nev.split("[")[0]
+        try:
+          nick = re.search("\[(?P<nick>.*)\]", nev).group(1)
+        except AttributeError:
+          nick = ""
+        profile_url = kartya.findAll("a")[1]["href"]
+        try:
+           pic_popup_url = kartya.find("a", "user_image")["onclick"].split("'")[1]
+        except KeyError:
+          pic_popup_url = ""
+        try:
+          pic_thumbnail = kartya.find("a", "user_image").img["src"]
+        except KeyError:
+          pic_thumbnail = ""
+        try:
+          city = kartya.find("div", "city").string.strip()
+        except AttributeError:
+          city = ""
+        tutu = {"name": name, "nick": nick, "profile_url": profile_url, "pic_popup_url": pic_popup_url, "pic_thumbnail": pic_thumbnail, "city": city}
+      cuccok.append(tutu)
+      logging.error(urlencode(searchparams))
+      memcache.add(urlencode(searchparams), cuccok)
+      return cuccok
   def firstn(self, count=5, **kwargs):
     url = "http://iwiw.hu/search/pages/user/ajaxsearch.jsp?do=AdvancedSearch&page=0&"
     url += urlencode(kwargs)
