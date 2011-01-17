@@ -111,7 +111,7 @@ class Iwiw:
       return result
     except AttributeError:
       raise NincsTalalatError(url)
-  def __init__(self, email="iwiw@bergengocia.net", password="asdfasdf", logincookie="JSESSIONID=1267529305187_oxMjcxYzk0NzgxYTo3MTlk5267843077287685; Path=/, password=5ca9030fb22494a0e2866d02b3bfdfa1; Expires=Tue, 19-Oct-2010 23:01:45 GMT; Path=/, autoLoginLimited=0; Expires=Thu, 01-Jan-1970 00:00:10 GMT; Path=/, autoLoginLimited=0; Expires=Thu, 01-Jan-1970 00:00:10 GMT, autoLogin=0; Expires=Thu, 01-Jan-1970 00:00:10 GMT; Path=/, autoLogin=0; Expires=Thu, 01-Jan-1970 00:00:10 GMT, autoLoginNew=1; Expires=Sun, 29-Aug-2010 11:28:25 GMT; Path=/, forgetEmail=0; Expires=Tue, 19-Oct-2010 23:01:45 GMT; Path=/, email=aXdpd0BiZXJnZW5nb2NpYS5uZXQ$; Expires=Tue, 19-Oct-2010 23:01:45 GMT; Path=/, httpslogin=0; Expires=Tue, 19-Oct-2010 23:01:45 GMT; Path=/"):
+  def __init__(self, email="iwiw@bergengocia.net", password="", logincookie="JSESSIONID=1267529305187_oxMjcxYzk0NzgxYTo3MTlk5267843077287685; Path=/, password=5ca9030fb22494a0e2866d02b3bfdfa1; Expires=Tue, 19-Oct-2010 23:01:45 GMT; Path=/, autoLoginLimited=0; Expires=Thu, 01-Jan-1970 00:00:10 GMT; Path=/, autoLoginLimited=0; Expires=Thu, 01-Jan-1970 00:00:10 GMT, autoLogin=0; Expires=Thu, 01-Jan-1970 00:00:10 GMT; Path=/, autoLogin=0; Expires=Thu, 01-Jan-1970 00:00:10 GMT, autoLoginNew=1; Expires=Sun, 29-Aug-2010 11:28:25 GMT; Path=/, forgetEmail=0; Expires=Tue, 19-Oct-2010 23:01:45 GMT; Path=/, email=aXdpd0BiZXJnZW5nb2NpYS5uZXQ$; Expires=Tue, 19-Oct-2010 23:01:45 GMT; Path=/, httpslogin=0; Expires=Tue, 19-Oct-2010 23:01:45 GMT; Path=/"):
     if logincookie:
       # bejelentkezés is for losers. de legalábbis nem megy.
       self.logincookie = logincookie
