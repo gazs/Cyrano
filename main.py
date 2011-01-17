@@ -13,11 +13,12 @@ from etr import Etr
 from iwiw import Iwiw
 
 import logging
+from google.appengine.api import memcache
+from urllib import urlencode
 
 class KurzustablaHandler(webapp.RequestHandler):
   def get(self):
      self.response.out.write('üzázs: POST felhasznalonev=[EHA kód]&jelszo=[ETR-es jelszó]')
-#    self.response.out.write('[{"kurzuskod": "BBN-ANG-342.118", "kurzusid": "650978", "cim": "A Biblia évszazadokon át"}, {"kurzuskod": "BBN-ANG-261", "kurzusid": "649424", "cim": "Alkalmazott nyelvészet előadás"}, {"kurzuskod": "BBN-ANG-215", "kurzusid": "651603", "cim": "Az angol irodalom 1890-től az 1960-as évekig"}, {"kurzuskod": "BBN-ANG-216\/d", "kurzusid": "651624", "cim": "Az angol irodalom 1890-től az 1960-as évekig"}, {"kurzuskod": "BBN-ANG-213", "kurzusid": "649386", "cim": "Az angol irodalom a restaurációtól 1890-ig"}, {"kurzuskod": "BBN-ANG-214\/d", "kurzusid": "651582", "cim": "Az angol irodalom a restaurációtól 1890-ig"}, {"kurzuskod": "BBN-AME-221", "kurzusid": "650985", "cim": "Az Egyesült Államok történelme 1"}, {"kurzuskod": "BBN-ANG-243", "kurzusid": "651149", "cim": "Haladó hangtan"}, {"kurzuskod": "BBN-ANG-253", "kurzusid": "651236", "cim": "Haladó mondattan"}, {"kurzuskod": "BBN-ANG-242\/a", "kurzusid": "651121", "cim": "Hangtan"}, {"kurzuskod": "ZBSK-02.149", "kurzusid": "651712", "cim": "Shakespeare elemzések"}, {"kurzuskod": "BBN-ANG-204\/1\/a", "kurzusid": "648772", "cim": "Tematikus nyelvfejlesztés"}]')
   def post(self):
     felhasznalonev = cgi.escape(self.request.get('felhasznalonev'))
     jelszo = cgi.escape(self.request.get('jelszo'))
@@ -34,16 +35,23 @@ class KozosHandler(webapp.RequestHandler):
     felhasznalonev = cgi.escape(self.request.get('felhasznalonev'))
     jelszo = cgi.escape(self.request.get('jelszo'))
     kurzusok = self.request.get_all("kurzus")
-    #try:
-    etr = Etr(felhasznalonev, jelszo)
-    cucc = []
-    for kurzuskod in kurzusok: 
-      nevsor = etr.listNevsor(kurzuskod)
-      nevek = set(x['nev'] for x in nevsor)
-      cucc.append(str(nevek))
-    kozosnevek = eval(" & ".join(cucc)) # fakin undorító. halmazok metszete.
-    etr.logout()
-    self.response.out.write(simplejson.dumps(list(kozosnevek)))
+    results = memcache.get("&".join(kurzusok))
+    if results is not None:
+      logging.error(results)
+      self.response.out.write(results)
+    else:
+      etr = Etr(felhasznalonev, jelszo)
+      cucc = []
+      nevsorok_hackish = {}
+      for kurzuskod in kurzusok: 
+        nevsor = etr.listNevsor(kurzuskod)
+        nevek = set(x['nev'] for x in nevsor)
+        cucc.append(str(nevek))
+      etr.logout()
+      kozosnevek = eval(" & ".join(cucc)) # fakin undorító. halmazok metszete.
+      dzsezn = simplejson.dumps(list(kozosnevek))
+      memcache.add("&".join(kurzusok),dzsezn)
+      self.response.out.write(dzsezn)
     
 class IwiwSearch(webapp.RequestHandler):
   def get(self):
@@ -56,9 +64,13 @@ class IwiwSearch(webapp.RequestHandler):
     iwiw = Iwiw(logincookie=False)
     try:
       eredmeny = iwiw.search(**params)
-      self.response.out.write(simplejson.dumps(eredmeny))
+      dzsezn = simplejson.dumps(eredmeny)
+      if dzsezn == "[]":
+        self.error(404)
+      else:
+        self.response.out.write(dzsezn)
     except UnboundLocalError:
-      #self.response.out.write("bla")
+      # ilyen akkor van, ha nincs találat.
       self.error(404)
 
 class IwiwFirstMatch(webapp.RequestHandler):
@@ -89,8 +101,8 @@ class MainHandler(webapp.RequestHandler):
 
   def get(self):
     path = os.path.join(os.path.dirname(__file__), 'templates/uj-index.html')
-    self.response.out.write(template.render(path, template_values))
-    #self.response.out.write("hamarosan, most már tényleg!")
+    #self.response.out.write(template.render(path, template_values))
+    self.response.out.write("hamarosan, most már tényleg!")
     
 
 def main():

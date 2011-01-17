@@ -5,6 +5,8 @@ from BeautifulSoup import BeautifulSoup
 import cookielib
 import re
 
+from google.appengine.api import memcache
+
 class Etr:
   def logout(self):
     self._browser.open("https://etr.elte.hu/etrweb/logout.asp")
@@ -52,7 +54,7 @@ class Etr:
     cj = cookielib.LWPCookieJar()
     self._browser.set_cookiejar(cj)
     self._browser.set_handle_equiv(True)
-    self._browser.set_handle_gzip(True)
+    #self._browser.set_handle_gzip(True)
     self._browser.set_handle_redirect(True)
     self._browser.set_handle_referer(True)
     self._browser.set_handle_robots(False)
@@ -65,4 +67,4 @@ class Etr:
     login = self._browser.submit()
     csekk = self._browser.response().read()
     if re.search("sikertelen", csekk):
-      raise BaseException
+      raise BaseException(csekk)

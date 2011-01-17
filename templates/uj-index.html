@@ -1,9 +1,10 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>keresődoboz</title>
+    <title>Cyrano</title>
     <script src="../static/jquery-1.4.2.min.js"></script>
     <script>
+      kozosnevek = [] //csúnya persze hogy globális, de nem akarok rájönni, hogy kéne nemcsúnyán.
 toldalekol = function(string) {
   var utolso_karakter = string.charAt(string.length-1);
   var magas_maganhangzok = ["e", "é", "í", "ö", "ő", "ü", "ű"];
@@ -42,20 +43,21 @@ toldalekol = function(string) {
   }
 }
 
-  function render_kartya (adat) {
+  function render_kartya (nev, adat) {
     prefix = "http://iwiw.hu"
     $("<div>", {"class": "hkartotek"})
-      .append ( $("<div>", {"html": "Asadf Jkle"}) ) 
-        .append ( $("<a>", {"href":"#","html": "&larr;", "click": function() { if ( $(this).siblings(".doboz").scrollLeft() !== 0) { $(this).siblings(".doboz").scrollLeft( $(".doboz").scrollLeft() - 212 ) }; return false; } }) )
-      .append ( $("<a>", {"href": "#", "html": "&rarr;", "click": function() { if ( $(this).siblings(".doboz").scrollLeft() !== $(this).siblings(".csuszka").width() ) { $(this).siblings(".doboz").scrollLeft( $(this).siblings(".doboz").scrollLeft() + 212 ) }; return false; } }) )
+      .append ( $("<div>", {"html": nev}) ) 
+        .append ( $("<a>", {"class": "nyil", "href":"#","html": "&larr;", "click": function() { if ( $(this).siblings(".doboz").scrollLeft() !== 0) { $(this).siblings(".doboz").scrollLeft( $(".doboz").scrollLeft() - 212 ) }; return false; } }) )
+      .append ( $("<a>", {"class": "nyil", "href": "#", "html": "&rarr;", "click": function() { if ( $(this).siblings(".doboz").scrollLeft() !== $(this).siblings(".csuszka").width() ) { $(this).siblings(".doboz").scrollLeft( $(this).siblings(".doboz").scrollLeft() + 212 ) }; return false; } }) )
       .append ( $("<div>", {"class": "doboz"}).append( $("<div>", {"class":"csuszka"}) ) )
       .appendTo("body");
+      if (adat.length === 1) { $(".hkartotek :last .nyil").hide() }
       $.each(adat, function(i, lap) {
         $("<div>", {"class": "hcard"})
           .append( $("<div>", {"class": "fn nickname", "html": lap.nick, "title": lap.name}) )
           .append( $("<div>", {"class": "adr locality", "html": lap.city}) )
           .append( $("<a>", {"class": "url", "html": "További info &gt; &gt;", "title": "Mutasd a kapcsolódó iWiW profilt", "href": prefix + lap.profile_url, "target": "_blank"}) )
-          .append( $("<a>", {"class": "profilepic", "href": prefix + lap.pic_popup_url}).append( $("<img>", {"src": lap.pic_thumbnail, "class": "photo"}) ) )
+          .append( $("<a>", {"class": "profilepic", "target": "_blank", "href": prefix + lap.pic_popup_url}).append( $("<img>", {"src": lap.pic_thumbnail, "class": "photo"}) ) )
           .appendTo(".hkartotek:last .csuszka");
         })
      $(".hkartotek:last .csuszka").css("width", adat.length * 215)
@@ -130,11 +132,11 @@ toldalekol = function(string) {
     	}
 	})
 
-$(".filter").mouseleave(function() {
-//ez konkrétan undorító. ez az automatikus becsukódása a részletpickernek, de fúúj.
-$(".filter").hide();
-$(".filtergomb").removeClass("clicked");
-})
+  $(".filter").mouseleave(function() {
+    //ez konkrétan undorító. ez az automatikus becsukódása a részletpickernek, de fúúj.
+    $(".filter").hide();
+    $(".filtergomb").removeClass("clicked");
+  })
 
 //kurzuslista benépesítése: volt step-2
 $("#login").submit(function() {
@@ -144,17 +146,50 @@ $("#login").submit(function() {
     "url": "/etr/kurzustabla",
     "data": $(this).serialize(),
     "success": function(data) { 
+      $("#error-login").hide()
       $.each(data, function() {
         $("<li/ >").append($("<input>", {"type": "checkbox", "name": "kurzus", "id":this.kurzusid, "value":this.kurzusid})).append($("<label>", {"for":this.kurzusid, "html": this.kurzuskod + " - " + this.cim})).appendTo("#kurzus form ul")
         })
         $("#login").hide()
       },
-      "error": function(data) { $("#error-login").show() },
+      "error": function(data) { $("#login :submit").val("bejelentkezem").attr("disabled", false); $("#error-login").show() },
       "dataType": "json"
     })
     return false
   })
 
+  // mutasd
+  $("button#muti").click(function() {
+    if ( $("#login").is(":visible") ) {
+      alert("előbb jelentkezz be");
+      } else {
+      $("#mondat button").attr("disabled", true);
+      $("#doboz, #megjegyzesdoboz").empty();
+    $.ajax({
+      "type": "POST",
+      "url": "/kozos",
+      "data": $("#login, #kurzus form").serialize(),
+      "success": function(data) {
+          kozosnevek = data;
+          console.log(kozosnevek);
+          $.each(kozosnevek, function() {
+            var lastName = this.split(" ")[0];
+            var firstName = this.split(" ")[1];
+            var nev = String(this);
+            $.ajax({
+              "type": "GET",
+              "url" : "/iwiw/search",
+              "data": $("#iwiw form").serialize() + "&lastName=" + encodeURI(lastName) + "&firstName=" + encodeURI(firstName),
+              "dataType": "json",
+              "success": function (data) { render_kartya(nev, data); },
+              "error": function(data) { $("#megjegyzesdoboz").append("nem találtam: " + nev + "<br>");  }
+            })
+          })
+      },
+      "dataType": "json"
+    }); $("#mondat button").attr("disabled", false)
+  }
+  })
 })
 
     </script>
@@ -167,15 +202,15 @@ $("#login").submit(function() {
       <label for="jelszo">jelszó</label> <input id="jelszo" name="jelszo" type="password" value=""> 
       <input type="submit" value="bejelentkezem"> 
     </form> 
-    <div id="error-login" class="error">Nem sikerült bejelentkezni. Ellenőrizd jól írtad-e a jelszavad.</div>
-    <h2>Mutasd az <a href="#" title="Szűrési feltételek beállításához kattints ide" id="filter-iwiw" class="filtergomb">összes</a> <span class="filterek"></span> csoptársat, akivel a <a href="#" id="filter-kurzus" class="filtergomb">kijelölt <span id="kurzus-count"></span> kurzus<span class="tobbesszam">ok</span>ra</a> együtt járok:</h2>
+    <div id="error-login" class="error">Nem sikerült bejelentkezni. Ellenőrizd jól írtad-e a jelszavad és próbáld újra.</div>
+    <div id="mondat">A <a href="#" id="filter-kurzus" class="filtergomb">kijelölt <span id="kurzus-count"></span> kurzus<span class="tobbesszam">ok</span>ra</a> velem együtt járó együtt <a href="#" title="Szűrési feltételek beállításához kattints ide" id="filter-iwiw" class="filtergomb">összes</a> <span class="filterek"></span> csoptárs<span class="targyrag">am</span> <button id="muti">mutasd</button></div>
     <div id="iwiw" class="filter">
       <form onsubmit="return false">
       <input type="radio" name="gender" value="0" id="lany"><label for="lany" class="dzsendor">lány</label>
       <input type="radio" name="gender" value="1" id="fiu"><label for="fiu" class="dzsendor">fiú</label>
       <input type="checkbox" id=withPhoto" name="withPhoto" value="0" ><label for=withPhoto">csak fényképes</label><br>
       <label for="ageFrom">életkor</label><input type="number" size=2 value=18 name="ageFrom" id="ageFrom">-tól <input type="number" size=2 name="ageTo" id="ageTo">-ig<br/>
-      <label for="univ">szak</label><input type="text" name="univ" id="univ" value="ELTE">
+      <label for="school_univ">szak</label><input type="text" name="school_univ" id="school_univ" value="ELTE">
         <!--becenév
         életkor
         nem
@@ -191,5 +226,8 @@ $("#login").submit(function() {
       </ul>
       </form>
     </div>
+    <div id="doboz">
+    </div>
+    <div id="megjegyzesdoboz"></div>
   </body>
 </html>

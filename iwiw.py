@@ -24,8 +24,8 @@ class NincsTalalatError(Exception):
 
 class Iwiw:
   def search(self, **searchparams):
-    results = memcache.get(urlencode(searchparams))
-    if results is not None:
+    results = memcache.get(urlencode(searchparams)) # cicabogár, ennek valójában nem itt lenne a helye
+    if results is "tutinemezaválasz": #not None:
       return results
     else:
       searchurl = "http://iwiw.hu/search/pages/user/ajaxsearch.jsp?do=AdvancedSearch&page=0&"
@@ -53,8 +53,7 @@ class Iwiw:
         except AttributeError:
           city = ""
         tutu = {"name": name, "nick": nick, "profile_url": profile_url, "pic_popup_url": pic_popup_url, "pic_thumbnail": pic_thumbnail, "city": city}
-      cuccok.append(tutu)
-      logging.error(urlencode(searchparams))
+        cuccok.append(tutu)
       memcache.add(urlencode(searchparams), cuccok)
       return cuccok
   def firstn(self, count=5, **kwargs):
